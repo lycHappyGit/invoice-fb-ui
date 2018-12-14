@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.invoice.dao.FpKjLogDao">
+    <select id="selectWait" resultType="io.renren.modules.invoice.entity.FpKjLogEntity">
+          select tlog.fpid,tlog.fpqqlsh,tlog.xhf_nsrsbh,tlog.fpkj_zt,tlog.fpkj_msg,tlog.lrrq from fp_kj_log tlog left join fp_kj tkj on tlog.fpid = tkj.kjid
+        <where>
+            tlog.fpkj_zt != '2000'
+            and tkj.fplx = 2
+            <if test="fpqqlsh != null and fpqqlsh != '' "> and tlog.fpqqlsh = #{fpqqlsh} </if>
+            <if test="nsrsbh != null and nsrsbh != '' "> and tlog.xhf_nsrsbh = #{nsrsbh} </if>
+            and fpid not in(select fpkj_id from fp_retry)
+          </where>
+          order by xgrq desc
+    </select>
+
+    <select id="selectRunning" resultType="io.renren.modules.invoice.entity.FpKjLogEntity">
+        select ttry.fpkj_id  as fpid,tlog.fpqqlsh,ttry.fpkj_zt,tlog.fpkj_msg,tlog.fb_cs,tlog.xhf_nsrsbh from fp_retry ttry left join fp_kj_log tlog on ttry.fpkj_id = tlog.fpid
+        <where>
+            <if test="fpqqlsh != null and fpqqlsh != '' "> and tlog.fpqqlsh = #{fpqqlsh} </if>
+            <if test="nsrsbh != null and nsrsbh != '' "> and tlog.xhf_nsrsbh = #{nsrsbh} </if>
+        </where>
+    </select>
+
+    <select id="selectByFpid" resultType="io.renren.modules.invoice.entity.FpKjLogEntity">
+        select log_id,fpid,fpkj_zt,fb_cs from fp_kj_log t where t.fpid = #{value}
+    </select>
+
+    <update id="updateByLogId" parameterType="io.renren.modules.invoice.entity.FpKjLogEntity">
+        update fp_kj_log
+        <set>
+            <if test="fbCs != null"> fb_cs =  #{fbCs},</if>
+        </set>
+        where log_id = #{logId}
+    </update>
+</mapper>
